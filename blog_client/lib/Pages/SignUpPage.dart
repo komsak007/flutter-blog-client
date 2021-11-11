@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
 
 import 'package:blog_client/NetworkHandler.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +17,10 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  late String errorText;
+  bool validate = true;
+  bool circular = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,38 +54,77 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 20,
             ),
             InkWell(
-              onTap: () {
-                if (_globalkey.currentState!.validate()) {
+              onTap: () async {
+                setState(() {
+                  circular = true;
+                });
+                await checkUser();
+                if (_globalkey.currentState!.validate() && validate) {
                   Map<String, String> data = {
                     "username": _usernameController.text,
                     "email": _emailController.text,
                     "password": _passwordController.text,
                   };
                   // print(data);
-                  networkHandler.post("/user/register", data);
+                  await networkHandler.post("/user/register", data);
+
+                  setState(() {
+                    circular = false;
+                  });
+                } else {
+                  setState(() {
+                    circular = false;
+                  });
                 }
               },
-              child: Container(
-                width: 150,
-                height: 50,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Color(0xff00A86B)),
-                child: Center(
-                  child: Text(
-                    "Sign Up",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+              child: circular
+                  ? CircularProgressIndicator()
+                  : Container(
+                      width: 150,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color(0xff00A86B)),
+                      child: Center(
+                        child: Text(
+                          "Sign Up",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
             )
           ],
         ),
       ),
     ));
+  }
+
+  checkUser() async {
+    if (_usernameController.text.length == 0) {
+      setState(() {
+        circular = false;
+        validate = false;
+        errorText = "Username can't be empty";
+      });
+    } else {
+      var response = await networkHandler
+          .get("/user/checkusername/${_usernameController.text}");
+      if (response['Status']) {
+        setState(() {
+          circular = false;
+          validate = false;
+          errorText = "Username already taken";
+        });
+      } else {
+        setState(() {
+          // circular = false;
+          validate = true;
+        });
+      }
+    }
   }
 
   Widget usernameTextField() {
@@ -92,19 +135,13 @@ class _SignUpPageState extends State<SignUpPage> {
           Text("Username"),
           TextFormField(
             controller: _usernameController,
-            validator: (value) {
-              if (value!.isEmpty) {
-                return "Username can't be empty";
-              }
-
-              return null;
-            },
             decoration: InputDecoration(
+                errorText: validate ? null : errorText,
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
-              color: Colors.black,
-              width: 2,
-            ))),
+                  color: Colors.black,
+                  width: 2,
+                ))),
           )
         ],
       ),

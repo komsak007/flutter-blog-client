@@ -1,17 +1,23 @@
 // ignore_for_file: file_names
 
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "https://5d5b-183-89-199-209.ngrok.io";
+  String baseUrl = "http://b0d9-183-89-197-214.ngrok.io";
   var log = Logger();
 
-  Future<dynamic> get(String url) async {
+  Future get(String url) async {
     url = formater(url);
 
     // /user/register
     var response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      log.i(response.body);
+      return json.decode(response.body);
+    }
     log.i(response.body);
     log.i(response.statusCode);
   }
@@ -19,7 +25,8 @@ class NetworkHandler {
   Future<dynamic> post(String url, Map<String, String> body) async {
     url = formater(url);
     print("1 ${body}");
-    var response = await http.post(Uri.parse(url), body: body);
+    var response = await http.post(Uri.parse(url),
+        headers: {"Content-Type": "application/json"}, body: json.encode(body));
     if (response.statusCode == 200 || response.statusCode == 201) {
       log.i(response.body);
       return response;

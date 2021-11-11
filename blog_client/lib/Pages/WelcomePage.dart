@@ -1,7 +1,12 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
+
+import 'package:blog_client/Pages/SignInPage.dart';
 import 'package:blog_client/Pages/SignUpPage.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -14,6 +19,10 @@ class _WelcomePageState extends State<WelcomePage>
   late Animation<Offset> animation1;
   late AnimationController _controller2;
   late Animation<Offset> animation2;
+
+  bool _isLogin = false;
+  final facebookLogin = FacebookLogin();
+  late Map data;
 
   @override
   void initState() {
@@ -96,7 +105,7 @@ class _WelcomePageState extends State<WelcomePage>
                 height: 20,
               ),
               boxContainer(
-                  "assets/facebook1.png", "Sign up with Facebook", null),
+                  "assets/facebook1.png", "Sign up with Facebook", onFBLogin),
               SizedBox(
                 height: 20,
               ),
@@ -117,12 +126,18 @@ class _WelcomePageState extends State<WelcomePage>
                     SizedBox(
                       width: 10,
                     ),
-                    Text(
-                      "SIGN IN",
-                      style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold),
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SignInPage()));
+                      },
+                      child: Text(
+                        "SIGN IN",
+                        style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold),
+                      ),
                     )
                   ],
                 ),
@@ -132,6 +147,37 @@ class _WelcomePageState extends State<WelcomePage>
         ),
       ),
     );
+  }
+
+  onFBLogin() async {
+    final result = await facebookLogin.logIn(['email']);
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        final token = result.accessToken;
+        final response = await http.get(Uri.parse(
+            "http://graph.facebook.com/v2.12/me?fields=name,picture,email&access_token=${token}"));
+
+        final data1 = json.decode(response.body);
+        print(data1);
+
+        setState(() {
+          _isLogin = true;
+          data = data1;
+        });
+        break;
+
+      case FacebookLoginStatus.cancelledByUser:
+        setState(() {
+          _isLogin = false;
+        });
+        break;
+
+      case FacebookLoginStatus.error:
+        setState(() {
+          _isLogin = false;
+        });
+        break;
+    }
   }
 
   onEmailClick() {
