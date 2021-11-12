@@ -1,8 +1,12 @@
-// ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
+// ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields, import_of_legacy_library_into_null_safe
+
+import 'dart:convert';
 
 import 'package:blog_client/NetworkHandler.dart';
+import 'package:blog_client/Pages/HomePage.dart';
 import 'package:blog_client/Pages/SignUpPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignInPage extends StatefulWidget {
   SignInPage({Key? key}) : super(key: key);
@@ -16,11 +20,11 @@ class _SignInPageState extends State<SignInPage> {
   final _globalkey = GlobalKey<FormState>();
   NetworkHandler networkHandler = NetworkHandler();
   TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   late String errorText;
   bool validate = true;
   bool circular = false;
+  final storage = new FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +98,38 @@ class _SignInPageState extends State<SignInPage> {
                 height: 30,
               ),
               InkWell(
-                onTap: () async {},
+                onTap: () async {
+                  setState(() {
+                    circular = true;
+                  });
+                  Map<String, String> data = {
+                    "username": _usernameController.text,
+                    "password": _passwordController.text,
+                  };
+                  var response = await networkHandler.post("/user/login", data);
+
+                  if (response.statusCode == 200 ||
+                      response.statusCode == 201) {
+                    Map<String, dynamic> output = json.decode(response.body);
+                    print(output['token']);
+                    await storage.write(key: "token", value: output["token"]);
+                    setState(() {
+                      validate = true;
+                      circular = false;
+                    });
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomePage()),
+                        (route) => false);
+                  } else {
+                    Map<String, dynamic> output = json.decode(response.body);
+                    setState(() {
+                      validate = false;
+                      errorText = output['msg'];
+                      circular = false;
+                    });
+                  }
+                },
                 child: circular
                     ? CircularProgressIndicator()
                     : Container(
@@ -104,13 +139,15 @@ class _SignInPageState extends State<SignInPage> {
                             borderRadius: BorderRadius.circular(10),
                             color: Color(0xff00A86B)),
                         child: Center(
-                          child: Text(
-                            "Sign In",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
-                          ),
+                          child: circular
+                              ? CircularProgressIndicator()
+                              : Text(
+                                  "Sign In",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
                         ),
                       ),
               ),
@@ -149,19 +186,9 @@ class _SignInPageState extends State<SignInPage> {
         Text("Password"),
         TextFormField(
           controller: _passwordController,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return "Password can't be empty";
-            }
-
-            if (value.length < 8) {
-              return "Password length must have >=8";
-            }
-
-            return null;
-          },
           obscureText: vis,
           decoration: InputDecoration(
+              errorText: validate ? null : errorText,
               suffixIcon: IconButton(
                 icon: Icon(vis ? Icons.visibility_off : Icons.visibility),
                 onPressed: () {
