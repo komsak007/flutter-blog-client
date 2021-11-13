@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "http://be83-183-89-197-48.ngrok.io";
+  String baseUrl = "http://880e-183-88-104-29.ngrok.io";
   var log = Logger();
 
   Future get(String url) async {
@@ -15,7 +15,8 @@ class NetworkHandler {
     // /user/register
     var response = await http.get(Uri.parse(url));
     if (response.statusCode == 200 || response.statusCode == 201) {
-      log.i(response.body);
+      Map<String, dynamic> output = json.decode(response.body);
+      log.i("user exist: ${output['Status']}");
       return json.decode(response.body);
     }
     log.i(response.body);

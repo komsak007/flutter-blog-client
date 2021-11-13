@@ -1,7 +1,12 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields
 
+import 'dart:convert';
+
 import 'package:blog_client/NetworkHandler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'HomePage.dart';
 
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key? key}) : super(key: key);
@@ -20,6 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
   late String errorText;
   bool validate = true;
   bool circular = false;
+  final storage = new FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -60,13 +66,48 @@ class _SignUpPageState extends State<SignUpPage> {
                 });
                 await checkUser();
                 if (_globalkey.currentState!.validate() && validate) {
+                  // we will send the data to rest server
                   Map<String, String> data = {
                     "username": _usernameController.text,
                     "email": _emailController.text,
                     "password": _passwordController.text,
                   };
-                  // print(data);
-                  await networkHandler.post("/user/register", data);
+                  print(data);
+                  var responseRegister =
+                      await networkHandler.post("/user/register", data);
+
+                  //Login Logic added here
+                  if (responseRegister.statusCode == 200 ||
+                      responseRegister.statusCode == 201) {
+                    Map<String, String> data = {
+                      "username": _usernameController.text,
+                      "password": _passwordController.text,
+                    };
+                    var response =
+                        await networkHandler.post("/user/login", data);
+
+                    if (response.statusCode == 200 ||
+                        response.statusCode == 201) {
+                      Map<String, dynamic> output = json.decode(response.body);
+                      print(output["token"]);
+                      await storage.write(key: "token", value: output["token"]);
+                      setState(() {
+                        validate = true;
+                        circular = false;
+                      });
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(),
+                          ),
+                          (route) => false);
+                    } else {
+                      Scaffold.of(context).showSnackBar(
+                          SnackBar(content: Text("Netwok Error")));
+                    }
+                  }
+
+                  //Login Logic end here
 
                   setState(() {
                     circular = false;
@@ -83,15 +124,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       width: 150,
                       height: 50,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Color(0xff00A86B)),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Color(0xff00A86B),
+                      ),
                       child: Center(
                         child: Text(
                           "Sign Up",
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

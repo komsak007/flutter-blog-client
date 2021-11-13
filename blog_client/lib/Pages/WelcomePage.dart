@@ -51,9 +51,9 @@ class _WelcomePageState extends State<WelcomePage>
   @override
   void dispose() {
     // TODO: implement dispose
-    super.dispose();
     _controller1.dispose();
     _controller2.dispose();
+    super.dispose();
   }
 
   @override
