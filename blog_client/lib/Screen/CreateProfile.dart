@@ -1,6 +1,9 @@
-// ignore_for_file: file_names, prefer_const_constructors
+// ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables, deprecated_member_use
+
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateProfile extends StatefulWidget {
   CreateProfile({Key? key}) : super(key: key);
@@ -10,6 +13,9 @@ class CreateProfile extends StatefulWidget {
 }
 
 class _CreateProfileState extends State<CreateProfile> {
+  XFile? _imageFile;
+  // late File pickedFile;
+  final ImagePicker _picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,6 +23,10 @@ class _CreateProfileState extends State<CreateProfile> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: ListView(
           children: [
+            imageProfile(),
+            SizedBox(
+              height: 20,
+            ),
             nameTextField(),
             SizedBox(
               height: 20,
@@ -39,6 +49,85 @@ class _CreateProfileState extends State<CreateProfile> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void takePhoto(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(
+      source: source,
+    );
+    setState(() {
+      _imageFile = pickedFile;
+    });
+  }
+
+  Widget imageProfile() {
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 80,
+            backgroundImage: _imageFile == null
+                ? AssetImage("assets/profile.jpeg")
+                : FileImage(File(_imageFile!.path)) as ImageProvider,
+          ),
+          Positioned(
+            bottom: 20.0,
+            right: 20.0,
+            child: InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: ((builder) => bottomSheet()),
+                );
+              },
+              child: Icon(
+                Icons.camera_alt,
+                color: Colors.teal,
+                size: 28.0,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100,
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Column(
+        children: [
+          Text(
+            "Choose Profile Photo",
+            style: TextStyle(fontSize: 20),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FlatButton.icon(
+                icon: Icon(Icons.camera),
+                label: Text("Camera"),
+                onPressed: () {
+                  takePhoto(ImageSource.camera);
+                },
+              ),
+              FlatButton.icon(
+                icon: Icon(Icons.image),
+                label: Text("Gallary"),
+                onPressed: () {
+                  takePhoto(ImageSource.gallery);
+                },
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
