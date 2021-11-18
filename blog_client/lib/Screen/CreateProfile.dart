@@ -1,7 +1,10 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables, deprecated_member_use
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:blog_client/NetworkHandler.dart';
+import 'package:blog_client/Pages/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,15 +16,23 @@ class CreateProfile extends StatefulWidget {
 }
 
 class _CreateProfileState extends State<CreateProfile> {
+  final networkHandler = NetworkHandler();
+  bool circular = false;
   XFile? _imageFile;
-  // late File pickedFile;
+  final _globalKey = GlobalKey<FormState>();
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _profession = TextEditingController();
+  final TextEditingController _dob = TextEditingController();
+  final TextEditingController _title = TextEditingController();
+  final TextEditingController _about = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      body: Form(
+        key: _globalKey,
         child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           children: [
             imageProfile(),
             SizedBox(
@@ -47,6 +58,68 @@ class _CreateProfileState extends State<CreateProfile> {
             SizedBox(
               height: 20,
             ),
+            InkWell(
+              onTap: () async {
+                setState(() {
+                  circular = true;
+                });
+                if (_globalKey.currentState!.validate()) {
+                  Map<String, String> data = {
+                    "name": _name.text,
+                    "profession": _profession.text,
+                    "dob": _dob.text,
+                    "title": _title.text,
+                    "about": _about.text,
+                  };
+                  var response =
+                      await networkHandler.post("/profile/add", data);
+                  print("response = ${response.statusCode}");
+                  if (response.statusCode == 200 ||
+                      response.statusCode == 201) {
+                    if (_imageFile != null) {
+                      var imageResponse = await networkHandler.patchImage(
+                          "/profile/add/image", _imageFile!.path);
+                      print("imageResponse = ${imageResponse.statusCode}");
+                      if (imageResponse.statusCode == 200) {
+                        setState(() {
+                          circular = false;
+                        });
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => HomePage()),
+                            (route) => false);
+                      }
+                    } else {
+                      setState(() {
+                        circular = false;
+                      });
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                          (route) => false);
+                    }
+                  }
+                }
+              },
+              child: Center(
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Center(
+                    child: circular
+                        ? CircularProgressIndicator()
+                        : Text(
+                            "Submit",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -134,6 +207,12 @@ class _CreateProfileState extends State<CreateProfile> {
 
   Widget nameTextField() {
     return TextFormField(
+      controller: _name,
+      validator: (value) {
+        if (value!.isEmpty) return "Name can't be empty";
+
+        return null;
+      },
       decoration: InputDecoration(
           border: OutlineInputBorder(
               borderSide: BorderSide(
@@ -153,6 +232,12 @@ class _CreateProfileState extends State<CreateProfile> {
 
   Widget professionTextField() {
     return TextFormField(
+      controller: _profession,
+      validator: (value) {
+        if (value!.isEmpty) return "Profession can't be empty";
+
+        return null;
+      },
       decoration: InputDecoration(
           border: OutlineInputBorder(
               borderSide: BorderSide(
@@ -172,6 +257,12 @@ class _CreateProfileState extends State<CreateProfile> {
 
   Widget dobField() {
     return TextFormField(
+      controller: _dob,
+      validator: (value) {
+        if (value!.isEmpty) return "DOB can't be empty";
+
+        return null;
+      },
       decoration: InputDecoration(
           border: OutlineInputBorder(
               borderSide: BorderSide(
@@ -191,6 +282,12 @@ class _CreateProfileState extends State<CreateProfile> {
 
   Widget titleTextField() {
     return TextFormField(
+      controller: _title,
+      validator: (value) {
+        if (value!.isEmpty) return "Title can't be empty";
+
+        return null;
+      },
       decoration: InputDecoration(
           border: OutlineInputBorder(
               borderSide: BorderSide(
@@ -210,6 +307,12 @@ class _CreateProfileState extends State<CreateProfile> {
 
   Widget aboutTextField() {
     return TextFormField(
+      controller: _about,
+      validator: (value) {
+        if (value!.isEmpty) return "About can't be empty";
+
+        return null;
+      },
       maxLines: 4,
       decoration: InputDecoration(
         border: OutlineInputBorder(

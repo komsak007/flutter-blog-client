@@ -2,36 +2,57 @@
 
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "http://880e-183-88-104-29.ngrok.io";
+  String baseUrl = "http://0ee2-183-89-197-46.ngrok.io";
   var log = Logger();
-
+  FlutterSecureStorage storage = FlutterSecureStorage();
   Future get(String url) async {
+    String token = await storage.read(key: "token");
     url = formater(url);
 
+    // print("Bearer $token");
+
     // /user/register
-    var response = await http.get(Uri.parse(url));
+    var response = await http
+        .get(Uri.parse(url), headers: {"Authorization": "Bearer $token"});
     if (response.statusCode == 200 || response.statusCode == 201) {
       Map<String, dynamic> output = json.decode(response.body);
-      log.i("user exist: ${output['Status']}");
+      log.i(response.body);
       return json.decode(response.body);
     }
-    log.i(response.body);
-    log.i(response.statusCode);
+    // log.i(response.body);
+    // log.i(response.statusCode);
   }
 
   Future<http.Response> post(String url, Map<String, String> body) async {
+    String token = await storage.read(key: "token");
     url = formater(url);
     print(body);
     var response = await http.post(Uri.parse(url),
-        headers: {"Content-Type": "application/json"}, body: json.encode(body));
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: json.encode(body));
 
     // Map<String, dynamic> output = json.decode(response.body);
-    // print(output['msg']);
+    // print(response.body);
 
+    return response;
+  }
+
+  Future<http.StreamedResponse> patchImage(String url, String filepath) async {
+    url = formater(url);
+    String token = await storage.read(key: "token");
+    var request = http.MultipartRequest('PATCH', Uri.parse(url));
+    request.files.add(await http.MultipartFile.fromPath("img", filepath));
+    request.headers.addAll(
+        {"Content-Type": "application/json", "Authorization": "Bearer $token"});
+    var response = request.send();
     return response;
   }
 

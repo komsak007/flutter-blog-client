@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:blog_client/NetworkHandler.dart';
 import 'package:flutter/material.dart';
 import 'CreateProfile.dart';
 
@@ -11,9 +12,38 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  NetworkHandler networkHandler = NetworkHandler();
+  Widget page = CircularProgressIndicator();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkProfile();
+  }
+
+  void checkProfile() async {
+    var response = await networkHandler.get("/profile/checkProfile");
+    if (response["status"] == true) {
+      setState(() {
+        page = showProfile();
+      });
+    } else {
+      setState(() {
+        page = button();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: button());
+    return Scaffold(
+      backgroundColor: Color(0xffEEEEFF),
+      body: page,
+    );
+  }
+
+  Widget showProfile() {
+    return Center(child: Text("Profile data is available"));
   }
 
   Widget button() {
