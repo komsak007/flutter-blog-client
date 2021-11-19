@@ -67,7 +67,7 @@ class _CreateProfileState extends State<CreateProfile> {
                   Map<String, String> data = {
                     "name": _name.text,
                     "profession": _profession.text,
-                    "dob": _dob.text,
+                    "DOB": _dob.text,
                     "title": _title.text,
                     "about": _about.text,
                   };

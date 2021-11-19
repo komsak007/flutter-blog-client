@@ -1,5 +1,6 @@
 import 'package:blog_client/Pages/HomePage.dart';
 import 'package:blog_client/Pages/WelcomePage.dart';
+import 'package:blog_client/Screen/MainProfile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -42,7 +43,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
           textTheme:
               GoogleFonts.openSansTextTheme(Theme.of(context).textTheme)),
-      home: page,
+      home: MainProfile(),
     );
   }
 }

@@ -2,12 +2,13 @@
 
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "http://0ee2-183-89-197-46.ngrok.io";
+  String baseUrl = "http://9c30-183-89-198-70.ngrok.io";
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
   Future get(String url) async {
@@ -58,5 +59,10 @@ class NetworkHandler {
 
   String formater(String url) {
     return baseUrl + url;
+  }
+
+  NetworkImage getImage(String imageName) {
+    String url = formater("/uploads//$imageName.jpg");
+    return NetworkImage(url);
   }
 }
