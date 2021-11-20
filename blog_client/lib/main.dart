@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
           textTheme:
               GoogleFonts.openSansTextTheme(Theme.of(context).textTheme)),
-      home: MainProfile(),
+      home: page,
     );
   }
 }

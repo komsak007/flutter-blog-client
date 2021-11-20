@@ -68,7 +68,7 @@ class _CreateProfileState extends State<CreateProfile> {
                     "name": _name.text,
                     "profession": _profession.text,
                     "DOB": _dob.text,
-                    "title": _title.text,
+                    "titleline": _title.text,
                     "about": _about.text,
                   };
                   var response =

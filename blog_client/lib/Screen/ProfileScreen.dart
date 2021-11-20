@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:blog_client/NetworkHandler.dart';
+import 'package:blog_client/Screen/MainProfile.dart';
 import 'package:flutter/material.dart';
 import 'CreateProfile.dart';
 
@@ -23,9 +24,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void checkProfile() async {
     var response = await networkHandler.get("/profile/checkProfile");
+    // print(response["status"]);
     if (response["status"] == true) {
       setState(() {
-        page = showProfile();
+        page = MainProfile();
       });
     } else {
       setState(() {
