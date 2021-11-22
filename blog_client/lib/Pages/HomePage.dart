@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables
 
+import 'package:blog_client/Blog/addBlog.dart';
 import 'package:blog_client/Screen/HomeScreen.dart';
 import 'package:blog_client/Screen/ProfileScreen.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,10 @@ class _HomePageState extends State<HomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.teal,
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => AddBlog()));
+        },
         child: Text(
           "+",
           style: TextStyle(fontSize: 35),
