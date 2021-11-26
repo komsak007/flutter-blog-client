@@ -8,9 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "http://55dc-183-89-193-129.ngrok.io";
+  String baseUrl = "http://3bd1-183-89-197-35.ngrok.io";
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
+
   Future get(String url) async {
     String token = await storage.read(key: "token");
     url = formater(url);

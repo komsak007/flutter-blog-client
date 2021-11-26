@@ -1,9 +1,12 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_const_constructors_in_immutables
 
+import 'package:blog_client/NetworkHandler.dart';
 import 'package:blog_client/Blog/addBlog.dart';
+import 'package:blog_client/Pages/WelcomePage.dart';
 import 'package:blog_client/Screen/HomeScreen.dart';
 import 'package:blog_client/Screen/ProfileScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -13,9 +16,52 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  NetworkHandler networkHandler = NetworkHandler();
   int currentState = 0;
+  final storage = FlutterSecureStorage();
   List<Widget> widgets = [HomeScreen(), ProfileScreen()];
   List<String> titleString = ["Home Page", "Profile Page"];
+  String username = "";
+
+  Widget profilePhoto = Container(
+    height: 100,
+    width: 100,
+    decoration: BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.circular(50),
+    ),
+  );
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkProfile();
+  }
+
+  void checkProfile() async {
+    var response = await networkHandler.get("/profile/checkProfile");
+    setState(() {
+      username = response['username'];
+    });
+    // print(response["status"]);
+    if (response["status"] == true) {
+      setState(() {
+        profilePhoto = CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkHandler().getImage(response['username']));
+      });
+    } else {
+      setState(() {
+        profilePhoto = Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50), color: Colors.black),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +72,38 @@ class _HomePageState extends State<HomePage> {
             DrawerHeader(
                 child: Column(
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                      color: Colors.black),
-                ),
+                profilePhoto,
                 SizedBox(
                   height: 10,
                 ),
-                Text("@Username")
+                Text("@${username}")
               ],
             )),
             ListTile(
-              title: Text("all post"),
-            )
+              title: Text("All post"),
+              trailing: Icon(Icons.launch),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("New Story"),
+              trailing: Icon(Icons.add),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Setting"),
+              trailing: Icon(Icons.settings),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Feedback"),
+              trailing: Icon(Icons.feedback),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Logout"),
+              trailing: Icon(Icons.power_settings_new),
+              onTap: logout,
+            ),
           ],
         ),
       ),
@@ -103,5 +165,13 @@ class _HomePageState extends State<HomePage> {
       ),
       body: widgets[currentState],
     );
+  }
+
+  void logout() async {
+    await storage.delete(key: "token");
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => WelcomePage()),
+        (route) => false);
   }
 }

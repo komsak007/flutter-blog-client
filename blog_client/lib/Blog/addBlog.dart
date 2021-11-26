@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, prefer_const_literals_to_create_immutables
 
+import 'package:blog_client/CustomWidget/OverlayCard.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -16,7 +17,7 @@ class _AddBlogState extends State<AddBlog> {
   TextEditingController _title = TextEditingController();
   TextEditingController _body = TextEditingController();
   ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
+  late XFile _imageFile;
   IconData iconphoto = Icons.image;
 
   @override
@@ -34,11 +35,23 @@ class _AddBlogState extends State<AddBlog> {
         ),
         actions: [
           FlatButton(
-              onPressed: null,
-              child: Text(
-                "Preview",
-                style: TextStyle(fontSize: 15, color: Colors.teal),
-              ))
+            onPressed: () {
+              if (_imageFile.path != null &&
+                  _globalkey.currentState!.validate()) {
+                showModalBottomSheet(
+                  context: context,
+                  builder: ((builder) => OverlayCard(
+                        imagefile: _imageFile,
+                        title: _title.text,
+                      )),
+                );
+              }
+            },
+            child: Text(
+              "Preview",
+              style: TextStyle(fontSize: 18, color: Colors.blue),
+            ),
+          )
         ],
       ),
       body: Form(
@@ -132,7 +145,7 @@ class _AddBlogState extends State<AddBlog> {
   void takeCoverPhoto() async {
     final coverPhoto = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      _imageFile = coverPhoto;
+      _imageFile = coverPhoto!;
       iconphoto = Icons.check_box;
     });
   }
