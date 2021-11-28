@@ -10,20 +10,21 @@ class AddBlogModel {
   int count;
   int share;
   int comment;
+  @JsonKey(name: "_id")
   String id;
   String username;
   String title;
   String body;
 
   AddBlogModel({
-    required this.coverImage,
-    required this.count,
-    required this.share,
-    required this.comment,
-    required this.id,
-    required this.username,
-    required this.title,
-    required this.body,
+    this.coverImage = "",
+    this.count = 0,
+    this.share = 0,
+    this.comment = 0,
+    this.id = "",
+    this.username = "",
+    this.title = "",
+    this.body = "",
   });
 
   factory AddBlogModel.fromJson(Map<String, dynamic> json) =>

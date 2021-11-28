@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:blog_client/Blog/Blogs.dart';
 import 'package:blog_client/Model/profileModel.dart';
 import 'package:blog_client/NetworkHandler.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +74,12 @@ class _MainProfileState extends State<MainProfile> {
                 Divider(
                   thickness: 0.8,
                 ),
+                SizedBox(
+                  height: 20,
+                ),
+                Blogs(
+                  url: "/blogpost/getOwnBlog",
+                )
               ],
             ),
     );

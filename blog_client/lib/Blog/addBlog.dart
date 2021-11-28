@@ -1,6 +1,11 @@
-// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, prefer_const_literals_to_create_immutables
+// ignore_for_file: file_names, prefer_const_constructors, deprecated_member_use, prefer_const_literals_to_create_immutables, avoid_print
+
+import 'dart:convert';
 
 import 'package:blog_client/CustomWidget/OverlayCard.dart';
+import 'package:blog_client/Model/addBlogModels.dart';
+import 'package:blog_client/NetworkHandler.dart';
+import 'package:blog_client/Pages/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -19,6 +24,7 @@ class _AddBlogState extends State<AddBlog> {
   ImagePicker _picker = ImagePicker();
   late XFile _imageFile;
   IconData iconphoto = Icons.image;
+  NetworkHandler networkHandler = NetworkHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +130,28 @@ class _AddBlogState extends State<AddBlog> {
 
   Widget addButton() {
     return InkWell(
-      onTap: () {},
+      onTap: () async {
+        if (_imageFile != null && _globalkey.currentState!.validate()) {
+          AddBlogModel addBlogModel =
+              AddBlogModel(body: _body.text, title: _title.text);
+          var response = await networkHandler.post1(
+              "/blogpost/Add", addBlogModel.toJson());
+          print(response.body);
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            String id = json.decode(response.body)['data'];
+            var imageResponse = await networkHandler.patchImage(
+                '/blogpost/add/coverImage/$id', _imageFile.path);
+            print(imageResponse.statusCode);
+            if (imageResponse.statusCode == 200 ||
+                imageResponse.statusCode == 201) {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                  (route) => false);
+            }
+          }
+        }
+      },
       child: Center(
         child: Container(
           height: 50,
