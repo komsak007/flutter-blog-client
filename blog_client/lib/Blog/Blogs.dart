@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 
+import 'package:blog_client/Blog/Blog.dart';
 import 'package:blog_client/CustomWidget/BlogCard.dart';
 import 'package:blog_client/Model/SuperModels.dart';
 import 'package:blog_client/Model/addBlogModels.dart';
@@ -35,13 +36,32 @@ class _BlogsState extends State<Blogs> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: data
-          .map((item) => BlogCard(
-                addBlogModel: item,
-                networkHandler: networkHandler,
-              ))
-          .toList(),
-    );
+    return data.length > 0
+        ? Column(
+            children: data
+                .map((item) => Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Blog()));
+                          },
+                          child: BlogCard(
+                            addBlogModel: item,
+                            networkHandler: networkHandler,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        )
+                      ],
+                    ))
+                .toList(),
+          )
+        : Center(
+            child: Text("We don't have any Blog Yet."),
+          );
   }
 }

@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, prefer_const_constructors_in_immutables, prefer_const_constructors
 
+import 'package:blog_client/Blog/Blogs.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,8 +14,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text("Home page"),
+      body: SingleChildScrollView(
+        child: Blogs(url: "/blogpost/getOtherBlog"),
       ),
     );
   }
