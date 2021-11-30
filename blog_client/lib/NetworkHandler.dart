@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 class NetworkHandler {
-  String baseUrl = "https://c031-183-89-195-232.ngrok.io";
+  String baseUrl = "https://2185-183-89-195-167.ngrok.io";
   var log = Logger();
   FlutterSecureStorage storage = FlutterSecureStorage();
 
@@ -35,6 +35,23 @@ class NetworkHandler {
     url = formater(url);
     print(body);
     var response = await http.post(Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token"
+        },
+        body: json.encode(body));
+
+    // Map<String, dynamic> output = json.decode(response.body);
+    // print(response.body);
+
+    return response;
+  }
+
+  Future<http.Response> patch(String url, Map<String, String> body) async {
+    String token = await storage.read(key: "token");
+    url = formater(url);
+    print(body);
+    var response = await http.patch(Uri.parse(url),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"

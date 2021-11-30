@@ -8,7 +8,7 @@ part of 'addBlogModels.dart';
 
 AddBlogModel _$AddBlogModelFromJson(Map<String, dynamic> json) => AddBlogModel(
       coverImage: json['coverImage'] as String? ?? "",
-      count: json['count'] as int? ?? 0,
+      like: json['like'] as int? ?? 0,
       share: json['share'] as int? ?? 0,
       comment: json['comment'] as int? ?? 0,
       id: json['_id'] as String? ?? "",
@@ -20,7 +20,7 @@ AddBlogModel _$AddBlogModelFromJson(Map<String, dynamic> json) => AddBlogModel(
 Map<String, dynamic> _$AddBlogModelToJson(AddBlogModel instance) =>
     <String, dynamic>{
       'coverImage': instance.coverImage,
-      'count': instance.count,
+      'like': instance.like,
       'share': instance.share,
       'comment': instance.comment,
       '_id': instance.id,

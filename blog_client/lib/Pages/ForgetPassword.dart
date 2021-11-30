@@ -3,20 +3,20 @@
 import 'dart:convert';
 
 import 'package:blog_client/NetworkHandler.dart';
-import 'package:blog_client/Pages/ForgetPassword.dart';
 import 'package:blog_client/Pages/HomePage.dart';
 import 'package:blog_client/Pages/SignUpPage.dart';
+import 'package:blog_client/Pages/WelcomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class SignInPage extends StatefulWidget {
-  SignInPage({Key? key}) : super(key: key);
+class ForgotPasswordPage extends StatefulWidget {
+  ForgotPasswordPage({Key? key}) : super(key: key);
 
   @override
-  _SignInPageState createState() => _SignInPageState();
+  _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool vis = true;
   final _globalkey = GlobalKey<FormState>();
   NetworkHandler networkHandler = NetworkHandler();
@@ -48,7 +48,7 @@ class _SignInPageState extends State<SignInPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Sign In with email",
+                "Forgot Password ?",
                 style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -65,100 +65,44 @@ class _SignInPageState extends State<SignInPage> {
               SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ForgotPasswordPage()));
-                    },
-                    child: Text(
-                      "Forgot Password ?",
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignUpPage()));
-                    },
-                    child: Text(
-                      "Create New User ?",
-                      style: TextStyle(
-                          color: Colors.blue[900],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14),
-                    ),
-                  ),
-                ],
-              ),
+
               SizedBox(
                 height: 30,
               ),
               InkWell(
                 onTap: () async {
-                  setState(() {
-                    circular = true;
-                  });
                   Map<String, String> data = {
-                    "username": _usernameController.text,
-                    "password": _passwordController.text,
+                    "password": _passwordController.text
                   };
-                  var response = await networkHandler.post("/user/login", data);
+                  var response = await networkHandler.patch(
+                      '/user/update/${_usernameController.text}', data);
 
                   if (response.statusCode == 200 ||
                       response.statusCode == 201) {
-                    Map<String, dynamic> output = json.decode(response.body);
-                    print(output['token']);
-                    await storage.write(key: "token", value: output["token"]);
-                    setState(() {
-                      validate = true;
-                      circular = false;
-                    });
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
+                        MaterialPageRoute(builder: (context) => WelcomePage()),
                         (route) => false);
-                  } else {
-                    Map<String, dynamic> output = json.decode(response.body);
-                    setState(() {
-                      validate = false;
-                      errorText = output['msg'];
-                      circular = false;
-                    });
                   }
                 },
-                child: circular
-                    ? CircularProgressIndicator()
-                    : Container(
-                        width: 150,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Color(0xff00A86B)),
-                        child: Center(
-                          child: circular
-                              ? CircularProgressIndicator()
-                              : Text(
-                                  "Sign In",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                        ),
-                      ),
+                child: Container(
+                  width: 150,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Color(0xff00A86B)),
+                  child: Center(
+                    child: circular
+                        ? CircularProgressIndicator()
+                        : Text(
+                            "Update Password",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
               ),
               // Divider(
               //   height: 50,
